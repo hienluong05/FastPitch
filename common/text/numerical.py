@@ -37,8 +37,8 @@ _special_digits_re = re.compile(
     r"pin\s+(?:code\s+)?(?:is\s+)?|pin\s+number|"
     r"zip\s+code\s+(?:is\s+)?|zip\s+(?:is\s+)?|"
     r"code\s+(?:is\s+)?|otp\s+(?:is\s+)?|otp\s+code|"
-    r"(?:please\s+)?(?:call|dial)\s+|extension\s+)"
-    r"([\d][\d\-\s]*)"
+    r"(?:please\s+)?(?:call|dial)|extension)"
+    r"\s+([\d][\d\-\s]*)"
 )
 
 # US phone numbers: (555) 123-4567, 555-123-4567, 1-800-555-0199, +1 (555) 123-4567
@@ -198,7 +198,7 @@ def _expand_special_digits(m):
     for ch in digits_raw:
         if ch.isdigit():
             words.append(_inflect.number_to_words(int(ch)))
-    return prefix + " ".join(words)
+    return prefix + " " + " ".join(words)
 
 
 def _spell_digit_group(group):
