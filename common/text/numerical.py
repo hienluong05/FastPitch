@@ -9,6 +9,8 @@ _measurements = "(f|c|k|d|m)"
 _measurements_key = {"f": "fahrenheit", "c": "celsius", "k": "thousand", "m": "meters"}
 _currency_key = {"$": "dollar", "£": "pound", "€": "euro", "₩": "won"}
 _inflect = inflect.engine()
+
+# --- Existing patterns ---
 _comma_number_re = re.compile(r"([0-9][0-9\,]+[0-9])")
 _decimal_number_re = re.compile(r"([0-9]+\.[0-9]+)")
 _currency_re = re.compile(
@@ -21,13 +23,45 @@ _measurement_re = re.compile(
     r"([0-9\.\,]*[0-9]+(\s)?{}\b)".format(_measurements), re.IGNORECASE
 )
 _ordinal_re = re.compile(r"[0-9]+(st|nd|rd|th)")
-# _range_re = re.compile(r'(?<=[0-9])+(-)(?=[0-9])+.*?')
 _roman_re = re.compile(
     r"\b(?=[MDCLXVI]+\b)M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{2,3})\b"
 )  # avoid I
 _multiply_re = re.compile(r"(\b[0-9]+)(x)([0-9]+)")
 _number_re = re.compile(r"[0-9]+'s|[0-9]+s|[0-9]+")
 
+# --- New patterns ---
+
+# Special digit contexts: spell out each digit individually
+_special_digits_re = re.compile(
+    r"(?i)\b(card\s+ending\s+in|card\s+number|account\s+number|"
+    r"pin\s+(?:code\s+)?(?:is\s+)?|pin\s+number|"
+    r"zip\s+code\s+(?:is\s+)?|zip\s+(?:is\s+)?|"
+    r"code\s+(?:is\s+)?|otp\s+(?:is\s+)?|otp\s+code|"
+    r"(?:please\s+)?(?:call|dial)\s+|extension\s+)"
+    r"([\d][\d\-\s]*)"
+)
+
+# US phone numbers: (555) 123-4567, 555-123-4567, 1-800-555-0199, +1 (555) 123-4567
+_phone_re = re.compile(
+    r"(?:\+?1[\-\.\s])?\((\d{3})\)[\-\.\s]?(\d{3})[\-\.\s](\d{4})\b"
+    r"|(?:\+?1[\-\.\s])(\d{3})[\-\.\s](\d{3})[\-\.\s](\d{4})\b"
+)
+
+# Negative numbers: -5, -3.14 (preceded by whitespace or start of string)
+_negative_re = re.compile(r"(?:(?<=\s)|(?<=^))-(\d+(?:\.\d+)?)\b")
+
+# Number ranges with prefix context words
+_range_re = re.compile(
+    r"\b(from|between|about|around|approximately|ages?|roughly|"
+    r"rated?|sized?|costs?|priced?)\s+"
+    r"(\d+(?:,\d{3})*(?:\.\d+)?)\s*[-–]\s*(\d+(?:,\d{3})*(?:\.\d+)?)\b",
+    re.IGNORECASE,
+)
+
+
+# ============================================================
+# Existing expansion functions
+# ============================================================
 
 def _remove_commas(m):
     return m.group(1).replace(",", "")
@@ -90,15 +124,11 @@ def _expand_ordinal(m):
 
 
 def _expand_measurement(m):
-    _, number, measurement = re.split("(\d+(?:\.\d+)?)", m.group(0))
+    _, number, measurement = re.split(r"(\d+(?:\.\d+)?)", m.group(0))
     number = _inflect.number_to_words(number)
     measurement = "".join(measurement.split())
     measurement = _measurements_key[measurement.lower()]
     return "{} {}".format(number, measurement)
-
-
-def _expand_range(m):
-    return " to "
 
 
 def _expand_multiply(m):
@@ -153,34 +183,94 @@ def _expand_number(m):
     return text
 
 
-# def _expand_range(match):
-#     (
-#         prefix0,
-#         prefix1,
-#         negative_symbol1,
-#         number_start,
-#         space,
-#         negative_symbol2,
-#         number_end,
-#         ending,
-#     ) = match.groups(0)
-#     prefix1 = "" if prefix1 == 0 else prefix1
-#     if prefix1 in vietnamese_set:
-#         return match.group(0)
-#     else:
-#         number_start = "-" + number_start if negative_symbol1 == "-" else number_start
-#         number_end = "-" + number_end if negative_symbol2 == "-" else number_end
-#         return (
-#             prefix0 + prefix1 + n2w(number_start) + " đến " + n2w(number_end) + ending
-#         )
+# ============================================================
+# New expansion functions
+# ============================================================
 
+def _expand_special_digits(m):
+    """Spell out each digit individually for special contexts like card numbers, PINs, etc.
+
+    Example: 'card ending in 1234' -> 'card ending in one two three four'
+    """
+    prefix = m.group(1)
+    digits_raw = m.group(2)
+    words = []
+    for ch in digits_raw:
+        if ch.isdigit():
+            words.append(_inflect.number_to_words(int(ch)))
+    return prefix + " ".join(words)
+
+
+def _spell_digit_group(group):
+    """Spell out a group of digits, e.g. '555' -> 'five five five'."""
+    return " ".join(_inflect.number_to_words(int(d)) for d in group)
+
+
+def _expand_phone(m):
+    """Expand US phone numbers to spelled-out digits grouped by segments.
+
+    Example: '(555) 123-4567' -> 'five five five, one two three, four five six seven'
+    """
+    # The regex has two alternatives; figure out which one matched
+    if m.group(1) is not None:
+        # Matched (555) 123-4567
+        area = m.group(1)
+        prefix = m.group(2)
+        line = m.group(3)
+    else:
+        # Matched 555-123-4567
+        area = m.group(4)
+        prefix = m.group(5)
+        line = m.group(6)
+
+    parts = [_spell_digit_group(area), _spell_digit_group(prefix), _spell_digit_group(line)]
+    return ", ".join(parts)
+
+
+def _expand_negative(m):
+    """Replace '-5' with 'negative 5', letting later rules convert digits to words.
+
+    Example: '-5' -> 'negative 5' -> (later) 'negative five'
+    """
+    return "negative " + m.group(1)
+
+
+def _expand_range(m):
+    """Expand number ranges with context words.
+
+    Example: 'from 5-10' -> 'from 5 to 10'
+             'between 5-10' -> 'between 5 and 10'
+    """
+    prefix = m.group(1)
+    start = m.group(2).replace(",", "")
+    end = m.group(3).replace(",", "")
+    if prefix.lower().startswith("between"):
+        connector = "and"
+    else:
+        connector = "to"
+    return f"{prefix} {start} {connector} {end}"
+
+
+# ============================================================
+# Main pipeline
+# ============================================================
 
 def normalize_numbers(text):
+    """Normalize numbers in English text to spoken-word form.
+
+    Processing order is critical: most specific patterns first, general last.
+    """
+    # New: context-specific patterns (most specific first)
+    text = re.sub(_special_digits_re, _expand_special_digits, text)
+    text = re.sub(_phone_re, _expand_phone, text)
+    text = re.sub(_range_re, _expand_range, text)
+    text = re.sub(_negative_re, _expand_negative, text)
+
+    # Existing: general number normalization
     text = re.sub(_comma_number_re, _remove_commas, text)
     text = re.sub(_currency_re, _expand_currency, text)
     text = re.sub(_decimal_number_re, _expand_decimal_point, text)
     text = re.sub(_ordinal_re, _expand_ordinal, text)
-    # text = re.sub(_range_re, _expand_range, text)
     # text = re.sub(_measurement_re, _expand_measurement, text)
     text = re.sub(_roman_re, _expand_roman, text)
     text = re.sub(_multiply_re, _expand_multiply, text)
