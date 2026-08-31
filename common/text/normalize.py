@@ -2,17 +2,12 @@ import re
 import os
 import sys
 
-# Add sub-repositories to sys.path so they can be imported without modifying their internal code
-current_dir = os.path.dirname(os.path.abspath(__file__))
-vi_path = os.path.join(current_dir, "vietnamese_normalization")
-
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
-if vi_path not in sys.path:
-    sys.path.insert(0, vi_path)
-
-from vietnamese_normalization.vi_cleaner import ViCleaner
-from cleaners import english_cleaners_v2 as english_cleaners
+try:
+    from .vietnamese_normalization.vi_cleaner import ViCleaner
+    from .cleaners import english_cleaners_v2 as english_cleaners
+except ImportError:
+    from vietnamese_normalization.vi_cleaner import ViCleaner
+    from cleaners import english_cleaners_v2 as english_cleaners
 
 # Regex for detecting Vietnamese diacritics
 _vi_diacritics_re = re.compile(

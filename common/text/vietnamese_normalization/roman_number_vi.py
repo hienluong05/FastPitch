@@ -1,7 +1,7 @@
 import re
 
 from vietnam_number.number2word import n2w
-from symbol_vi import vietnamese_re
+from .symbol_vi import vietnamese_re
 
 _quotes_symbol = r"(\"|\')?"
 _space = r"(\s)"
