@@ -31,15 +31,12 @@ _letter_to_arpabet = {
     's': 'Z'
 }
 
-# Acronyms that should not be expanded
-hardcoded_acronyms = [
-    'BMW', 'MVD', 'WDSU', 'GOP', 'UK', 'AI', 'GPS', 'BP', 'FBI', 'HD',
-    'CES', 'LRA', 'PC', 'NBA', 'BBL', 'OS', 'IRS', 'SAC', 'UV', 'CEO', 'TV',
-    'CNN', 'MSS', 'GSA', 'USSR', 'DNA', 'PRS', 'TSA', 'US', 'GPU', 'USA',
-    'FPCC', 'CIA']
-
-# Words and acronyms that should be read as regular words, e.g., NATO, HAPPY, etc.
-uppercase_whiteliset = []
+# Acronyms that should not be expanded to letters (read as regular words)
+uppercase_whitelist = [
+    'NASA', 'NATO', 'ASAP', 'AWOL', 'SCUBA', 'LASER', 'RADAR', 'UNICEF', 
+    'UNESCO', 'PIN', 'RAM', 'ROM', 'MAC', 'GIF', 'JPEG', 'STEM', 'SWOT', 
+    'OPEC', 'AIDS', 'COVID', 'COVID19', 'SARS', 'MESA', 'SONAR', 'FEMA'
+]
 
 acronyms_exceptions = {
     'NVIDIA': 'N.VIDIA',
@@ -58,7 +55,7 @@ def _expand_acronyms_to_arpa(m, add_spaces=True):
     acronym = m.group(0)
 
     # remove dots if they exist
-    acronym = re.sub('\.', '', acronym)
+    acronym = re.sub(r'\.', '', acronym)
 
     acronym = "".join(acronym.split())
     arpabet = cmudict.lookup(acronym)
@@ -89,7 +86,7 @@ def expand_acronyms(m):
     text = m.group(1)
     if text in acronyms_exceptions:
         text = acronyms_exceptions[text]
-    elif text in uppercase_whiteliset:
+    elif text in uppercase_whitelist:
         text = text
     else:
         text = '.'.join(text) + '.'
