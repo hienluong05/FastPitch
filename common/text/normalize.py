@@ -5,7 +5,6 @@ import sys
 # Add sub-repositories to sys.path so they can be imported without modifying their internal code
 current_dir = os.path.dirname(os.path.abspath(__file__))
 vi_path = os.path.join(current_dir, "vietnamese_normalization")
-en_path = os.path.join(current_dir, "english_normalization")
 
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
