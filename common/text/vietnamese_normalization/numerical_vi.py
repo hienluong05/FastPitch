@@ -1,9 +1,9 @@
 from vietnam_number.number2word import n2w, n2w_single
 import re
 
-from datestime_vi import _remove_prefix_zero
+from .datestime_vi import _remove_prefix_zero
 
-from symbol_vi import vietnamese_set, vietnamese_without_num_re
+from .symbol_vi import vietnamese_set, vietnamese_without_num_re
 
 
 _negative_symbol_re = r"(.)(-{1})?"

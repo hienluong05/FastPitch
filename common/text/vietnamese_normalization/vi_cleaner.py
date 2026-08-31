@@ -1,19 +1,19 @@
 import re
 import unicodedata
 
-from passage_utils import combine_passages, split_long_passages, split_text_passages
+from .passage_utils import combine_passages, split_long_passages, split_text_passages
 
-from sentence_utils import get_pieces
+from .sentence_utils import get_pieces
 
-from letter_vi import normalize_letter_vi
-from currency_vi import normalize_currency_vi
-from acronym_vi import spell_acronyms_vi
-from numberical_vi import normalize_number_vi
-from measurement_vi import normalize_measurement_vi
-from datestime_vi import normalize_date, normalize_time
-from roman_number_vi import normalize_roman_numbers
-from abbreviation_vi import normalize_abbreviations_vi
-from symbol_vi import (
+from .letter_vi import normalize_letter_vi
+from .currency_vi import normalize_currency_vi
+from .acronym_vi import spell_acronyms_vi
+from .numerical_vi import normalize_number_vi
+from .measurement_vi import normalize_measurement_vi
+from .datestime_vi import normalize_date, normalize_time
+from .roman_number_vi import normalize_roman_numbers
+from .abbreviation_vi import normalize_abbreviations_vi
+from .symbol_vi import (
     DEFAULT_PIECE_MAX_LENGTH,
     DEFAULT_SENTENCE_MAX_LENGTH,
     opening_brackets_and_punctutations_re,

@@ -1,9 +1,9 @@
 import re
 
-from symbol_vi import vietnamese_without_num_re
+from .symbol_vi import vietnamese_without_num_re
 
 _currency_key = {
-    "\$": "đô la",
+    r"\$": "đô la",
     "£": "bảng",
     "€": "ơ rô",
     "₩": "uân",
@@ -12,40 +12,82 @@ _currency_key = {
     "euro": "ơ rô",
     "eur": "ơ rô",
     "vnd": "đồng",
+    "vnđ": "đồng",
     "đ": "đồng",
     "¥": "yên",
     "ndt": "nhân dân tệ",
-    "vnđ": "đồng",
     "k": "nghìn",
 }
 
+_currency_combine_regex = r"(" + "|".join(_currency_key.keys()) + r")"
 
-_currency_combine_regex = "|".join(_currency_key.keys())
-_currency_vi_re = re.compile(
-    vietnamese_without_num_re
-    + r"("
+# Match currency symbol BEFORE number (e.g. $1.5, $ 100, $1.5M, $100k)
+_currency_before_num_re = re.compile(
+    r"(?i)(?<!\w)"
     + _currency_combine_regex
-    + ")"
-    + vietnamese_without_num_re,
-    re.IGNORECASE,
+    + r"\s*(\d+(?:[.,]\d+)?)\s*([mMkKmMbB]?)\b"
 )
 
+# Match currency symbol AFTER number (e.g. 1.5$, 100 USD, 1.5M $, 100k VNĐ)
+_currency_after_num_re = re.compile(
+    r"(?i)\b(\d+(?:[.,]\d+)?)\s*([mMkKmMbB]?)\s*"
+    + _currency_combine_regex
+    + r"(?!\w)"
+)
 
-def _expand_currency(match):
-    prefix, currency, suffix = match.groups(0)
-    prefix = "" if prefix == 0 else prefix
-    suffix = "" if suffix == 0 else suffix
-    if currency == "Đ" and suffix == ".":
-        return match.group(0)
-    if suffix == currency or prefix == currency:
-        return match.group(0)
+# Match isolated currency symbols (fallback)
+_isolated_currency_re = re.compile(
+    r"(?i)(?<!\w)" + _currency_combine_regex + r"(?!\w)"
+)
+
+_magnitude_key = {
+    "m": "triệu",
+    "b": "tỷ",
+    "k": "nghìn",
+}
+
+def _expand_currency_value(value, magnitude, currency):
+    # e.g. 1.5, m, $ -> 1.5 triệu đô la
+    # Wait, the number expanding will happen in numerical_vi.py later.
+    # We just need to replace the currency and magnitude with words,
+    # and put them AFTER the number.
+    # So "$1.5M" -> "1.5 triệu đô la"
+    
+    currency_word = _currency_key.get(currency.lower(), currency)
+    
     if currency.lower() == "$":
-        currency = _currency_key["\$"]
-    elif currency.lower() in _currency_key.keys():
-        currency = _currency_key[currency.lower()]
-    return prefix + currency + suffix
+        currency_word = _currency_key[r"\$"]
+        
+    mag_word = ""
+    if magnitude:
+        mag_word = " " + _magnitude_key.get(magnitude.lower(), magnitude.lower())
+        
+    return f"{value}{mag_word} {currency_word}"
+
+
+def _expand_currency_before(match):
+    currency = match.group(1)
+    value = match.group(2)
+    magnitude = match.group(3)
+    return _expand_currency_value(value, magnitude, currency)
+
+
+def _expand_currency_after(match):
+    value = match.group(1)
+    magnitude = match.group(2)
+    currency = match.group(3)
+    return _expand_currency_value(value, magnitude, currency)
+
+
+def _expand_isolated_currency(match):
+    currency = match.group(1)
+    if currency.lower() == "$":
+        return _currency_key[r"\$"]
+    return _currency_key.get(currency.lower(), currency)
 
 
 def normalize_currency_vi(text):
-    text = re.sub(_currency_vi_re, _expand_currency, text)
+    text = re.sub(_currency_before_num_re, _expand_currency_before, text)
+    text = re.sub(_currency_after_num_re, _expand_currency_after, text)
+    text = re.sub(_isolated_currency_re, _expand_isolated_currency, text)
     return text
