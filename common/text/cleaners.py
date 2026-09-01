@@ -89,12 +89,12 @@ def english_cleaners(text):
 
 
 def english_cleaners_v2(text):
-    text = convert_to_ascii(text)
     text = expand_datestime(text)
     text = expand_letters_and_numbers(text)
     text = expand_numbers(text)
     text = expand_abbreviations(text)
     text = spell_acronyms(text)
+    text = convert_to_ascii(text)
     text = lowercase(text)
     text = collapse_whitespace(text)
     # compatibility with basic_english symbol set

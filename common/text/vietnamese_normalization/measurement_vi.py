@@ -1,5 +1,5 @@
 import re
-from symbol_vi import vietnamese_re, vietnamese_without_num_re
+from .symbol_vi import vietnamese_re, vietnamese_without_num_re
 
 _measurement_key_vi = {
     "p": "phút",

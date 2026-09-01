@@ -1,6 +1,6 @@
 import re
 
-from symbol_vi import vietnamese_set
+from .symbol_vi import vietnamese_set
 
 _letter_key_vi = {
     "a": "ây",

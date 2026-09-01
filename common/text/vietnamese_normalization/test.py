@@ -1,4 +1,4 @@
-from vi_cleaner import ViCleaner
+from .vi_cleaner import ViCleaner
 
 cleaner = ViCleaner()
 text = "Tỉ số 2 - 1"

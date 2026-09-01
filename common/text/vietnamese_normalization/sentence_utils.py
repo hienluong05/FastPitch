@@ -1,6 +1,6 @@
 import re
 
-from symbol_vi import punctuations
+from .symbol_vi import punctuations
 
 
 def isTextOnly(c: str):

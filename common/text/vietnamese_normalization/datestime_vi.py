@@ -1,8 +1,8 @@
 import re
 
 from vietnam_number.number2word import n2w
-from symbol_vi import vietnamese_re, vietnamese_for_date_re
-from roman_number_vi import normalize_roman_numbers
+from .symbol_vi import vietnamese_re, vietnamese_for_date_re
+from .roman_number_vi import normalize_roman_numbers
 
 day_in_month = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 

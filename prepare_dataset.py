@@ -80,10 +80,12 @@ def parse_args(parser):
     
     # Language
     parser.add_argument('--symbol_set', default='english_basic',
-                        choices=['english_basic', 'english_mandarin_basic'],
+                        choices=['english_basic', 'english_mandarin_basic', 'vietnamese_basic'],
                         help='Symbols in the dataset')
+    parser.add_argument('--text-cleaners', nargs='*',
+                        default=['english_cleaners_v2'], type=str,
+                        help='Type of text cleaners for input text')
     return parser
-
 
 def main():
     parser = argparse.ArgumentParser(description='FastPitch Data Pre-processing')
@@ -114,7 +116,7 @@ def main():
         dataset = TTSDataset(
             args.dataset_path,
             filelist,
-            text_cleaners=['english_cleaners_v2'],
+            text_cleaners=args.text_cleaners,
             n_mel_channels=args.n_mel_channels,
             symbol_set=args.symbol_set,
             p_arpabet=0.0,

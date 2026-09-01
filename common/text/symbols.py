@@ -43,6 +43,12 @@ def get_symbols(symbol_set='english_basic'):
         _special = '-'
         _letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
         symbols = list(_pad + _special + _punctuation + _letters) + _arpabet + _mandarin_phonemes + _chinese_punctuation
+    elif symbol_set == 'vietnamese_basic':
+        _pad = '_'
+        _punctuation = '!\'(),.:;? '
+        _special = '-'
+        _vietnamese_letters = 'aáàảãạăắằẳẵặâấầẩẫậbcdđeéèẻẽẹêếềểễệfghiíìỉĩịjklmnoóòỏõọôốồổỗộơớờởỡợpqrstuúùủũụưứừửữựvwxyýỳỷỹỵz'
+        symbols = list(_pad + _special + _punctuation + _vietnamese_letters.upper() + _vietnamese_letters)
     else:
         raise Exception("{} symbol set does not exist".format(symbol_set))
 
@@ -50,7 +56,7 @@ def get_symbols(symbol_set='english_basic'):
 
 
 def get_pad_idx(symbol_set='english_basic'):
-    if symbol_set in {'english_basic', 'english_basic_lowercase', 'english_mandarin_basic'}:
+    if symbol_set in {'english_basic', 'english_basic_lowercase', 'english_mandarin_basic', 'vietnamese_basic'}:
         return 0
     else:
         raise Exception("{} symbol set not used yet".format(symbol_set))
