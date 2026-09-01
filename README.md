@@ -605,6 +605,60 @@ refer to the [blogpost](https://blogs.nvidia.com.tw/2022/06/20/cht-bilingual-spe
    Paths to specific checkpoints can be supplied as env variables or changed
    directly in the `.sh` files.
 
+### Example: Training a model on Vietnamese (Vivos dataset)
+
+FastPitch can also be trained on the Vietnamese Vivos dataset. The repository contains scripts to automatically prepare the dataset and run the training.
+
+1. **Download and extract the dataset**
+
+   Download the Vivos dataset and extract it to a directory. For example, place it at `./data/vivos`.
+   The expected directory structure is:
+   ```bash
+   ./data/vivos
+   ├── train
+   │   ├── prompts.txt
+   │   └── waves
+   └── test
+       ├── prompts.txt
+       └── waves
+   ```
+
+2. **Install requirements**
+
+   There are a couple of additional requirements for the Vivos dataset preparation. Make sure to downgrade `setuptools` to avoid issues with `pkg_resources` when installing or using `librosa`.
+   ```bash
+   pip install "setuptools<70.0.0"
+   pip install librosa
+   ```
+
+3. **Prepare filelists**
+
+   Run the filelist preparation script to generate the training and test filelists (which will be saved to `./filelists/vivos_train.txt` and `./filelists/vivos_test.txt`):
+   ```bash
+   python scripts/prepare_vivos_filelist.py --vivos-dir data/vivos --out-dir filelists
+   ```
+
+4. **Pre-process the dataset**
+
+   Extract acoustic features (mel-spectrograms and pitch) for the dataset:
+   ```bash
+   bash scripts/prepare_vivos_dataset.sh
+   ```
+
+5. **Train the model**
+
+   Start training the FastPitch model on the Vivos dataset:
+   ```bash
+   bash scripts/train_vivos.sh
+   ```
+
+6. **Inference**
+
+   After training, you can synthesize audio using the trained model:
+   ```bash
+   bash scripts/infer_vivos.sh
+   ```
+
 ## Performance
 
 ### Benchmarking
