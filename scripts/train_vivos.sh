@@ -57,6 +57,7 @@ ARGS+=" --kl-loss-warmup-epochs 100"
 ARGS+=" --text-cleaners $TEXT_CLEANERS"
 ARGS+=" --symbol-set $SYMBOL_SET"
 ARGS+=" --n-speakers $NSPEAKERS"
+ARGS+=" --sampling-rate 16000"
 
 [ "$AMP" = "true" ]                    && ARGS+=" --amp"
 [ "$PHONE" = "true" ]                  && ARGS+=" --p-arpabet 1.0"
