@@ -22,6 +22,5 @@ python prepare_dataset.py \
     --f0-method pyin \
     --n-workers 8 \
     --batch-size 1 \
-    --sampling-rate 16000 \
     --symbol_set $SYMBOL_SET \
     --text-cleaners $TEXT_CLEANERS

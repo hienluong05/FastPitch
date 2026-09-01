@@ -39,6 +39,5 @@ python inference.py \
     --text-cleaners basic_cleaners \
     --symbol-set vietnamese_basic \
     --batch-size 1 \
-    --sampling-rate 16000 \
     --denoising-strength 0.01 \
     --amp
