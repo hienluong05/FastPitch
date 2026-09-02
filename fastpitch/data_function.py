@@ -244,7 +244,7 @@ class TTSDataset(torch.utils.data.Dataset):
             melspec = self.stft.mel_spectrogram(audio_norm)
             melspec = torch.squeeze(melspec, 0)
         else:
-            melspec = torch.load(filename)
+            melspec = torch.load(filename, weights_only=False)
             # assert melspec.size(0) == self.stft.n_mel_channels, (
             #     'Mel dimension mismatch: given {}, expected {}'.format(
             #         melspec.size(0), self.stft.n_mel_channels))
@@ -276,7 +276,7 @@ class TTSDataset(torch.utils.data.Dataset):
             cached_fpath = Path(self.betabinomial_tmp_dir, fname)
 
             if cached_fpath.is_file():
-                return torch.load(cached_fpath)
+                return torch.load(cached_fpath, weights_only=False)
 
         attn_prior = beta_binomial_prior_distribution(text_len, mel_len)
 
@@ -296,7 +296,7 @@ class TTSDataset(torch.utils.data.Dataset):
 
         if self.load_pitch_from_disk:
             pitchpath = fields[0]
-            pitch = torch.load(pitchpath)
+            pitch = torch.load(pitchpath, weights_only=False)
             if self.pitch_mean is not None:
                 assert self.pitch_std is not None
                 pitch = normalize_pitch(pitch, self.pitch_mean, self.pitch_std)
@@ -307,7 +307,7 @@ class TTSDataset(torch.utils.data.Dataset):
             fname_method = fname.with_suffix('.pt')
             cached_fpath = Path(self.pitch_tmp_dir, fname_method)
             if cached_fpath.is_file():
-                return torch.load(cached_fpath)
+                return torch.load(cached_fpath, weights_only=False)
 
         # No luck so far - calculate
         wav = audiopath
