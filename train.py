@@ -188,7 +188,7 @@ def parse_args(parser):
                        help='Maximum mel frequency')
 
     dist = parser.add_argument_group('distributed setup')
-    dist.add_argument('--local_rank', type=int, default=os.getenv('LOCAL_RANK', 0),
+    dist.add_argument('--local_rank', '--local-rank', type=int, default=os.getenv('LOCAL_RANK', 0),
                       help='Rank of the process for multiproc; do not set manually')
     dist.add_argument('--world_size', type=int, default=os.getenv('WORLD_SIZE', 1),
                       help='Number of processes for multiproc; do not set manually')
