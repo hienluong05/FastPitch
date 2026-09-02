@@ -35,8 +35,16 @@ from itertools import cycle
 import numpy as np
 import torch
 import torch.distributed as dist
-import amp_C
-from apex.optimizers import FusedAdam, FusedLAMB
+try:
+    import amp_C
+except ImportError:
+    amp_C = None
+
+try:
+    from apex.optimizers import FusedAdam, FusedLAMB
+except ImportError:
+    from torch.optim import Adam as FusedAdam
+    from torch.optim import AdamW as FusedLAMB
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
@@ -180,7 +188,7 @@ def parse_args(parser):
                        help='Maximum mel frequency')
 
     dist = parser.add_argument_group('distributed setup')
-    dist.add_argument('--local_rank', type=int, default=os.getenv('LOCAL_RANK', 0),
+    dist.add_argument('--local_rank', '--local-rank', type=int, default=os.getenv('LOCAL_RANK', 0),
                       help='Rank of the process for multiproc; do not set manually')
     dist.add_argument('--world_size', type=int, default=os.getenv('WORLD_SIZE', 1),
                       help='Number of processes for multiproc; do not set manually')
@@ -278,9 +286,14 @@ def init_multi_tensor_ema(model, ema_model):
 
 
 def apply_multi_tensor_ema(decay, model_weights, ema_weights, overflow_buf):
-    amp_C.multi_tensor_axpby(
-        65536, overflow_buf, [ema_weights, model_weights, ema_weights],
-        decay, 1-decay, -1)
+    if amp_C is not None:
+        amp_C.multi_tensor_axpby(
+            65536, overflow_buf, [ema_weights, model_weights, ema_weights],
+            decay, 1-decay, -1)
+    else:
+        with torch.no_grad():
+            for m, e in zip(model_weights, ema_weights):
+                e.copy_(decay * e + (1 - decay) * m)
 
 
 def main():
