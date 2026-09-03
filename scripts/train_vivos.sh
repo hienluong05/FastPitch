@@ -25,7 +25,7 @@ export OMP_NUM_THREADS=1
 : ${PHONE:=false}
 : ${ENERGY:=true}
 : ${LOAD_PITCH_FROM_DISK:=true}
-: ${LOAD_MEL_FROM_DISK:=true}
+: ${LOAD_MEL_FROM_DISK:=false}
 
 # Vivos has 1 speaker per utterance but many speakers in total. 
 # Since we didn't add speaker embedding in the filelist processing, we treat it as 1 speaker or we can add it. 
