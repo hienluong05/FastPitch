@@ -4,13 +4,13 @@
 export OMP_NUM_THREADS=1
 
 : ${NUM_GPUS:=1}
-: ${BATCH_SIZE:=16}
+: ${BATCH_SIZE:=8}
 : ${GRAD_ACCUMULATION:=2}
 : ${OUTPUT_DIR:="./output_vivos"}
 : ${LOG_FILE:=$OUTPUT_DIR/nvlog.json}
 : ${DATASET_PATH:="data/vivos"}
-: ${TRAIN_FILELIST:=filelists/vivos_train.txt}
-: ${VAL_FILELIST:=filelists/vivos_test.txt}
+: ${TRAIN_FILELIST:=filelists/vivos_with_pitch_train.txt}
+: ${VAL_FILELIST:=filelists/vivos_with_pitch_test.txt}
 : ${AMP:=true}
 
 : ${LEARNING_RATE:=0.1}
