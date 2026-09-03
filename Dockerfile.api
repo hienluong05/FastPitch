@@ -1,0 +1,15 @@
+ARG FROM_IMAGE_NAME=nvcr.io/nvidia/pytorch:22.08-py3
+FROM ${FROM_IMAGE_NAME}
+
+ENV PYTHONPATH /workspace/fastpitch
+WORKDIR /workspace/fastpitch
+
+ADD requirements.txt .
+RUN pip install -r requirements.txt
+RUN pip install fastapi uvicorn pydantic python-multipart
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
