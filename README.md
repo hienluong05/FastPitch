@@ -645,9 +645,17 @@ FastPitch can also be trained on the Vietnamese Vivos dataset. The repository co
    bash scripts/prepare_vivos_dataset.sh
    ```
 
-5. **Train the model**
+5. **Generate filelists for FastPitch Training**
 
-   Start training the FastPitch model on the Vivos dataset:
+   Since we train with `LOAD_MEL_FROM_DISK=true` (to avoid on-the-fly recomputation), the filelists must point to the `.pt` files instead of `.wav` files. Run the provided helper script:
+   ```bash
+   python scripts/generate_training_filelist.py --input filelists/vivos_train.txt --output filelists/vivos_with_pitch_train.txt
+   python scripts/generate_training_filelist.py --input filelists/vivos_test.txt --output filelists/vivos_with_pitch_test.txt
+   ```
+
+6. **Train the model**
+
+   Start training the FastPitch model on the Vivos dataset. Note: The NVIDIA Apex dependency has been removed, so this will run natively using PyTorch AMP.
    ```bash
    bash scripts/train_vivos.sh
    ```
