@@ -20,3 +20,7 @@ Bạn hãy chạy lệnh sau:
 Lệnh này sẽ gỡ bản 83 hiện tại và thay bằng bản 69.x. Sau khi chạy xong, lỗi kia chắc chắn sẽ được giải quyết!
 
 --> Cần hạ phiên bản setuptools
+
+Cần tải pip install tensorboard
+
+Lệnh xóa \r: sed -i 's/\r$//' scripts/train_vivos.sh
